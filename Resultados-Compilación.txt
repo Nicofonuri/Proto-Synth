@@ -1,0 +1,5 @@
+﻿Compilación iniciada a las 8:23 p. m....
+1>------ Operación Compilar iniciada: Proyecto: ZERO_CHECK, configuración: Debug x64 ------
+1>Checking File Globs
+========== Compilación: 1 correcto, 0 erróneo, 1 actualizado, 0 omitido ==========
+========== Compilar completado a las 8:23 p. m. y tardó 00,373 segundos ==========
