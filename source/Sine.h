@@ -6,6 +6,7 @@ class Sine
 public:
 	void prepare(double sampleRate, int numChannels);
 	void process(juce::AudioBuffer<float>& buffer);
+	void setFrequency(float newFrequency);
 
 private:
 

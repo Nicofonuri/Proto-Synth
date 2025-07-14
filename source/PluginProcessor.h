@@ -2,6 +2,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Sine.h"
+#include "MidiProcessor.h"
 
 
 //==============================================================================
@@ -51,6 +52,11 @@ private:
     double phase = 0.0;
     double frequency = 440.0;
     double sampleRate = 44100.0;
+    bool noteOn = false;
+
+    MidiProcessor midiProcessor;
+
+
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)

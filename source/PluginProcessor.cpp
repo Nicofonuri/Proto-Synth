@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
      : AudioProcessor (BusesProperties()
@@ -83,13 +84,15 @@ void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String
 }
 
 //==============================================================================
-void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+// Use this method as the place to do any pre-playback
+// initialisation that you need..
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-    juce::ignoreUnused (sampleRate, samplesPerBlock);
+    juce::ignoreUnused(sampleRate, samplesPerBlock);
     sinewave.prepare(sampleRate, getTotalNumOutputChannels());
+   
 }
+
 
 void AudioPluginAudioProcessor::releaseResources()
 {
@@ -147,30 +150,22 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // interleaved by keeping the same state.
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     {
-        auto* channelData = buffer.getWritePointer (channel);
-        juce::ignoreUnused (channelData);
+        auto* channelData = buffer.getWritePointer(channel);
+        juce::ignoreUnused(channelData);
         // ..do something to the data...
-    }
 
-    
         for (const auto metadata : midiMessages)
         {
             const auto msg = metadata.getMessage();
 
             if (msg.isNoteOn())
             {
-                auto noteNumber = msg.getNoteNumber();
-                frequency = juce::MidiMessage::getMidiNoteInHertz(noteNumber);
-                phase = 0.0;
-
-                juce::Logger::writeToLog("Nota MIDI ON: " + juce::String(noteNumber));
-            }
-
-            if (msg.isNoteOff())
-            {
-                juce::Logger::writeToLog("Nota MIDI OFF: " + juce::String(msg.getNoteNumber()));
+                float freq = juce::MidiMessage::getMidiNoteInHertz(msg.getNoteNumber());
+                sinewave.setFrequency(freq);  // Aquí le pasas la nueva frecuencia a tu clase
+                juce::Logger::writeToLog("Nota MIDI -> " + juce::String(msg.getNoteNumber()) + " : " + juce::String(freq) + " Hz");
             }
         }
+    }
 
     sinewave.process(buffer);
 }

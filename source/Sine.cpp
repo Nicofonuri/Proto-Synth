@@ -5,8 +5,14 @@ void Sine::prepare(double sampleRate, int numChannels)
     currentSampleRate = static_cast<float>(sampleRate);
     timeIncrement = 1.0 / currentSampleRate;
     currentTime.resize(numChannels, 0.0f);
+
 }
 
+void Sine::setFrequency(float newFrequency)
+
+{
+    frequency = newFrequency;
+}
 
 void Sine::process(juce::AudioBuffer<float>& buffer)
 {
