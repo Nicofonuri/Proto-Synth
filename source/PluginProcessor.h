@@ -3,6 +3,8 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "Sine.h"
 #include "MidiProcessor.h"
+#include "SineVoice.h"
+#include "SineSound.h"
 
 
 //==============================================================================
@@ -53,8 +55,21 @@ private:
     double frequency = 440.0;
     double sampleRate = 44100.0;
     bool noteOn = false;
+    std::vector<float> activeFrequencies;
+
+    int numFrequencies = 16;
+
+    int numNoteOn = 0;
+   
+
+
 
     MidiProcessor midiProcessor;
+
+    
+    juce::Synthesiser synth;
+  
+
 
 
 

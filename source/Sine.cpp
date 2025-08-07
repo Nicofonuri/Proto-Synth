@@ -8,10 +8,24 @@ void Sine::prepare(double sampleRate, int numChannels)
 
 }
 
+void Sine::noteOn()
+{
+    amplitude = 0.3f;
+}
+
+void Sine::noteOff()
+
+{
+    amplitude = 0.0f;
+}
+
 void Sine::setFrequency(float newFrequency)
 
 {
     frequency = newFrequency;
+    
+    for (auto& t : currentTime)
+        t = 0.0f;
 }
 
 void Sine::process(juce::AudioBuffer<float>& buffer)

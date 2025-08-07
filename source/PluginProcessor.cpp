@@ -65,7 +65,7 @@ int AudioPluginAudioProcessor::getNumPrograms()
 int AudioPluginAudioProcessor::getCurrentProgram()
 {
     return 0;
-}
+} 
 
 void AudioPluginAudioProcessor::setCurrentProgram (int index)
 {
@@ -88,8 +88,14 @@ void AudioPluginAudioProcessor::prepareToPlay(double sampleRate, int samplesPerB
 // Use this method as the place to do any pre-playback
 // initialisation that you need..
 {
-    juce::ignoreUnused(sampleRate, samplesPerBlock);
-    sinewave.prepare(sampleRate, getTotalNumOutputChannels());
+    synth.clearVoices();
+    for (int i = 0; i < 8; ++i)
+        synth.addVoice(new SineVoice());
+
+    synth.clearSounds();
+    synth.addSound(new SineSound());
+
+    synth.setCurrentPlaybackSampleRate(sampleRate);
    
 }
 
@@ -148,26 +154,15 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // the samples and the outer loop is handling the channels.
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+
+
     {
-        auto* channelData = buffer.getWritePointer(channel);
-        juce::ignoreUnused(channelData);
-        // ..do something to the data...
 
-        for (const auto metadata : midiMessages)
-        {
-            const auto msg = metadata.getMessage();
+    buffer.clear(); // borra cualquier contenido previo
+    synth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
-            if (msg.isNoteOn())
-            {
-                float freq = juce::MidiMessage::getMidiNoteInHertz(msg.getNoteNumber());
-                sinewave.setFrequency(freq);  // Aquí le pasas la nueva frecuencia a tu clase
-                juce::Logger::writeToLog("Nota MIDI -> " + juce::String(msg.getNoteNumber()) + " : " + juce::String(freq) + " Hz");
-            }
-        }
     }
-
-    sinewave.process(buffer);
+    
 }
 
 //==============================================================================
