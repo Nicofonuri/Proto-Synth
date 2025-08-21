@@ -81,8 +81,8 @@ target_sources(SINEGENERATOR
         source/SineSound.h
         source/SineVoice.cpp
         source/SineVoice.h
-        source/Maximilian.cpp
-        source/Maximilian.h)
+		source/Oscillator.cpp
+		source/Oscillator.h)
 
 # `target_compile_definitions` adds some preprocessor definitions to our target. In a Projucer
 # project, these might be passed in the 'Preprocessor Definitions' field. JUCE modules also make use
