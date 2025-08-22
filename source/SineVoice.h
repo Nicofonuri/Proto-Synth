@@ -1,5 +1,4 @@
 #pragma once
-#include <JuceHeader.h>
 #include "SineSound.h"
 #include "Oscillator.h"
 class SineVoice : public juce::SynthesiserVoice
@@ -20,9 +19,12 @@ public:
     void startNote(int midiNoteNumber, float velocity,
         juce::SynthesiserSound*, int /*currentPitchWheelPosition*/) override
     {
+        
+
         currentAngle = 0.0;
         level = velocity * 0.25; // controla volumen máximo
         tailOff = 0.0;
+        isNoteOn = true;
 
         float upperDetunedMidi = midiNoteNumber + detuneValue;
         float lowerDetuneMidi = midiNoteNumber - detuneValue;
@@ -38,85 +40,32 @@ public:
 
     void stopNote(float /*velocity*/, bool allowTailOff) override
     {
-        if (allowTailOff)
-        {
-            if (tailOff == 0.0)
-                tailOff = 1.0;
-        }
-        else
-        {
-            clearCurrentNote();
-            angleDelta = 0.0;
-        }
-    }
 
+        clearCurrentNote();
+        isNoteOn = false;
+        level = 0.0;
+        sineLeft.resetPhase();
+        sineCenter.resetPhase();
+        sineRight.resetPhase();
+
+    }
     void renderNextBlock(juce::AudioBuffer<float>& outputBuffer, int startSample, int numSamples) override
     {
-        /*if (angleDelta != 0.0)
+        if (isNoteOn)
         {
-            if (tailOff > 0.0)
+            for (int samp = startSample; samp < numSamples; ++samp)
             {
-                while (--numSamples >= 0)
-                {
-                    auto currentSample = (float)(std::sin(currentAngle) * level * tailOff);
+                float leftOsc = sineLeft.generate() * 0.5f;
+                float centreOsc = sineCenter.generate() * 0.5f;
+                float rightOsc = sineRight.generate() * 0.5f;
 
-                    for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
-                        outputBuffer.addSample(channel, startSample, currentSample);
+                float leftSample = leftOsc + 0.5f * centreOsc;
+                float rightSample = rightOsc + 0.5f * centreOsc;
 
-                    currentAngle += angleDelta;
-                    ++startSample;
-
-                    tailOff *= 0.99;
-
-                    if (tailOff <= 0.005)
-                    {
-                        clearCurrentNote();
-                        angleDelta = 0.0;
-                        break;
-                    }
-                }
-            }
-            else
-            {
-                while (--numSamples >= 0)
-                {
-                    auto currentSample = (float)(std::sin(currentAngle) * level);
-
-                    for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
-                        outputBuffer.addSample(channel, startSample, currentSample);
-
-                    currentAngle += angleDelta;
-                    ++startSample;
-                }
-            }
-        }*/
-
-        int numChans = outputBuffer.getNumChannels();
-        int numSamps = outputBuffer.getNumSamples();
-
-        for (int chan = 0; chan < numChans; chan++)
-        {
-            //Canal izquierdo, genera sine izquierdo y 0.5 del centro
-            if (chan == 0)
-            {
-                for (int samp = 0; samp < numSamps; samp++)
-                {
-                    float sample = (sineLeft.generate() + sineCenter.generate() * 0.66) / 2.0;
-                    outputBuffer.setSample(chan, samp, sample);
-                }
-            }
-
-            //Canal derecho, genera sine derecho y 0.5 del centro
-            if (chan == 1)
-            {
-                for (int samp = 0; samp < numSamps; samp++)
-                {
-                    float sample = (sineRight.generate() + sineCenter.generate() * 0.66) / 2.0;
-                    outputBuffer.setSample(chan, samp, sample);
-                }
+                outputBuffer.addSample(0, startSample + samp, leftSample * level);
+                outputBuffer.addSample(1, startSample + samp, rightSample * level);
             }
         }
-
     }
 
     void pitchWheelMoved(int) override {}
@@ -132,6 +81,8 @@ private:
     Oscillator sineCenter;
     Oscillator sineRight;
     float detuneValue = 0.1;
+
+    bool isNoteOn = false;
 
     float midiToFreq(float midi)
     {

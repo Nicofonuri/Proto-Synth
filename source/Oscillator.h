@@ -15,6 +15,7 @@ public:
 
     void setFrequency(float freq);
     void prepare(float sampleRate);
+    void resetPhase();
     float getFrequency();
     float generate();
 

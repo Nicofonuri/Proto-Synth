@@ -3,4 +3,5 @@
 /build/
 /out/
 *.wav
-
+*.pd
+*.filtergraph
